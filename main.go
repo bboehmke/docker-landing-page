@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/prometheus/common/log"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("GET from %s", r.RemoteAddr)
+		log.Printf("GET from %s", r.RemoteAddr)
 		containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
 		if err != nil {
 			panic(err)
@@ -67,7 +67,7 @@ func main() {
 		_, _ = fmt.Fprint(w, "</ul></html>")
 	})
 
-	log.Info("Start server")
+	log.Printf("Start server")
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
