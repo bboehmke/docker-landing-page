@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -32,7 +33,8 @@ func main() {
 			host = "http://" + strings.Split(r.Host, ":")[0]
 		}
 
-		var lines []string
+		links := make(map[string]string, len(containers))
+		var names []string
 		for _, container := range containers {
 			if strings.ToLower(container.Labels["landing-page.enabled"]) != "true" {
 				continue
@@ -56,11 +58,12 @@ func main() {
 				}
 			}
 
-			lines = append(lines,
-				fmt.Sprintf("<b><a href=\"%s:%d\" target=\"_blank\">%s</a></b>",
-					host,
-					port,
-					name))
+			names = append(names, name)
+			links[name] = fmt.Sprintf(
+				"<b><a href=\"%s:%d\" target=\"_blank\">%s</a></b>",
+				host,
+				port,
+				name)
 		}
 
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
@@ -69,8 +72,9 @@ func main() {
 		w.WriteHeader(200)
 
 		_, _ = fmt.Fprint(w, "<html><br/><ul>")
-		for _, entry := range lines {
-			_, _ = fmt.Fprintf(w, "<li>%s</li>", entry)
+		sort.Strings(names)
+		for _, entry := range names {
+			_, _ = fmt.Fprintf(w, "<li>%s</li>", links[entry])
 		}
 		_, _ = fmt.Fprint(w, "</ul></html>")
 	})
