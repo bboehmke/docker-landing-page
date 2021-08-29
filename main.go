@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -26,8 +27,12 @@ func main() {
 			panic(err)
 		}
 
-		var lines []string
+		host := os.Getenv("HOST_ADDR")
+		if host == "" {
+			host = "http://" + strings.Split(r.Host, ":")[0]
+		}
 
+		var lines []string
 		for _, container := range containers {
 			if strings.ToLower(container.Labels["landing-page.enabled"]) != "true" {
 				continue
@@ -52,12 +57,15 @@ func main() {
 			}
 
 			lines = append(lines,
-				fmt.Sprintf("<b><a href=\"http://%s:%d\">%s</a></b>",
-					strings.Split(r.Host, ":")[0],
+				fmt.Sprintf("<b><a href=\"%s:%d\">%s</a></b>",
+					host,
 					port,
 					name))
 		}
 
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+		w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+		w.Header().Set("Expires", "0")                                         // Proxies.
 		w.WriteHeader(200)
 
 		_, _ = fmt.Fprint(w, "<html><br/><ul>")
