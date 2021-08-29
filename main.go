@@ -57,7 +57,7 @@ func main() {
 			}
 
 			lines = append(lines,
-				fmt.Sprintf("<b><a href=\"%s:%d\">%s</a></b>",
+				fmt.Sprintf("<b><a href=\"%s:%d\" target=\"_blank\">%s</a></b>",
 					host,
 					port,
 					name))
